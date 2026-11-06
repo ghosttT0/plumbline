@@ -1,5 +1,6 @@
 {
-  "purpose": "anonymous peer review",
+  "project": "Plumbline",
+  "purpose": "public research repository",
   "hash": "sha256",
   "excluded_generated_directory": "outputs/",
   "files": {
@@ -40,8 +41,8 @@
       "sha256": "c268aafebb8f57b7f137f29fe2cf99b6f1b87a9a3f12b6a49a53105db51109c2"
     },
     "DATA_DICTIONARY.md": {
-      "bytes": 2782,
-      "sha256": "7e1bf4e20ea0ffdc31a9eedd8b136ac295900f65c452c5d3e0cf06e89db24eea"
+      "bytes": 3673,
+      "sha256": "34bd43f67ee72f7b8590598ac090612f139008139bd3deabc516da91a4780dc7"
     },
     "expected/summary.json": {
       "bytes": 3464,
@@ -76,16 +77,20 @@
       "sha256": "4e5e5d2e1ea26830d9a8f9cd8685224ae6581da56cbfddba7010289ea8168118"
     },
     "README.md": {
-      "bytes": 3508,
-      "sha256": "5c57bcafced1e57f26c05d78730244ce31162de8c6819257c70b2a96ef4f383a"
+      "bytes": 4200,
+      "sha256": "1f639971d5140ca1cdfe7d183dff07d191192427dc99010f68cb6554eed067f0"
+    },
+    "README.zh-CN.md": {
+      "bytes": 2200,
+      "sha256": "2bcc748f00512554edb591166d38976e151d20a82b720f7b235709562208900e"
     },
     "render_prompt.py": {
-      "bytes": 3204,
-      "sha256": "15e5b562b88b5f78c601875c2cb0038b333844e6813f98197380039ed6068c82"
+      "bytes": 3122,
+      "sha256": "af76fe722d685f66d491346e13e9498e35e2836fe5c01808e69da8523836c10e"
     },
     "reproduce.py": {
-      "bytes": 5293,
-      "sha256": "61b03c05c708d2801329228a95fdc02682bc5edb508f8ff89c2b5ee80cf97afa"
+      "bytes": 5229,
+      "sha256": "3b3bd462e30d1cebe5b64096dec7f5b42c59f707ea2b45bbc61b5bc1ed0515cd"
     },
     "requirements.txt": {
       "bytes": 75,
@@ -96,8 +101,8 @@
       "sha256": "20f86b669f9557ca2e5cfb11ebe3278518c801445a956c1bae43e04f4fb52543"
     },
     "verify.py": {
-      "bytes": 2785,
-      "sha256": "75d8a8c4cfe76902c7ed6ed3c18848054418a7f2fb062c59e32294f1b8729ae9"
+      "bytes": 2678,
+      "sha256": "ff69786a4ab952a71bf0d74c79f7589ec18675179629c36688e65583802b0b79"
     }
   }
 }

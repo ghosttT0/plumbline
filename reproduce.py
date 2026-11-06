@@ -1,4 +1,4 @@
-"""Reproduce archived experiment statistics offline. No API keys or network needed."""
+"""Recompute Plumbline benchmark statistics and check the reference summary."""
 import argparse, collections, hashlib, json, re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
@@ -54,5 +54,5 @@ def main():
     compare(summary,expected)
     (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     (out/"verification.json").write_text(json.dumps({"pass":True,"checked_values":len(checks),"checks":checks,"network_calls":0},indent=2)+"\n",encoding="utf-8")
-    print(f"PASS: {len(checks)} archived summary values checked; 836 main reviews + 72 separate pilot reviews.")
+    print(f"PASS: {len(checks)} reference summary values checked; 836 main reviews + 72 separate pilot reviews.")
 if __name__=="__main__":main()

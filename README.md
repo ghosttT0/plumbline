@@ -1,50 +1,97 @@
-# Anonymous review artifact
+# Plumbline
 
-Artifact for **Flagging Is Not Naming: Mention, Attribution, and Verdicts in LLM Code Review**.
+**A benchmark and analysis toolkit for LLM code review.**
+
+[中文说明](README.zh-CN.md)
+
+Plumbline studies how language-model reviewers identify code issues, attribute findings to architectural rules, and make approval decisions. It brings together code-change diffs, reviewer responses, source-grounded annotations, prompt templates, and scripts for reproducing the evaluation.
+
+This repository accompanies **Flagging Is Not Naming: Mention, Attribution, and Verdicts in LLM Code Review**.
 
 ## Quick start
 
-Python 3.11+; no API keys, third-party packages, network access or Docker required for the default checks:
+Requires **Python 3.11+**. The analysis uses the Python standard library and runs locally on the included data.
 
 ```sh
+git clone https://github.com/ghosttt0/plumbline.git
+cd plumbline
 python reproduce.py
+```
+
+The command recomputes the results, checks 93 values against the reference summary, and writes:
+
+- `outputs/summary.json` — experiment counts, approval rates, issue precision, rule attribution, and sampling stability.
+- `outputs/verification.json` — the verification results.
+
+Run the tests and check file integrity:
+
+```sh
 python -m unittest discover -s tests -v
 python verify.py
 ```
 
-`reproduce.py` recomputes the archived summary from the included review/annotation records and compares 93 summary values with the frozen expectations. Results are written to `outputs/summary.json` and `outputs/verification.json`.
+## Benchmark
 
-## Included experiments
+The benchmark covers three Python codebases: **rentomatic**, **full-stack-fastapi-template**, and **Saleor**.
 
-- Main grid: 33 items, three core reviewers, four conditions — 396 responses.
-- GPT-track replication: the same 33 items and four conditions — 132 responses.
-- Expansion: 33 additional items — 308 responses, including three repetitions per condition for 22 leak items.
-- Main total: **66 items, 836 responses, 660 distinct cells**.
-- Final issue-level annotations: **686 reviews**. The remaining 150 reviews are outside this final issue-level annotation dataset.
-- Paired-burial pilot: **18 items and 72 responses**, stored and analyzed separately.
+- **66 main items**: 33 original-grid items and 33 expansion items.
+- **836 reviewer responses**: 396 core responses, 132 GPT-track responses, and 308 expansion responses.
+- **660 distinct review cells**, with repeated sampling on expansion leak items.
+- **686 reviews with final issue-level annotations**.
+- **72 additional responses** from an 18-item paired-burial pilot, analyzed separately.
 
-The formal annotation protocol follows the paper: two independent human coders received metadata-blinded review packets, followed by human adjudication. Anonymous review IDs and the analysis metadata needed for reproduction are included; participant identities and internal working records are not.
+The evaluation separates construct mention, design-rule attribution, issue validity, and the reviewer's approve/reject verdict. Review annotations follow the paper's human double-blind coding and adjudication protocol.
 
-## Contents
+See [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for record fields, joins, labels, and analysis units.
 
-- `data/`: full item diffs, verbatim reviewer text, final annotations, pilot data, and item-status definitions.
-- `prompts/`, `render_prompt.py`: architecture statements, system-prompt templates and user-message rendering.
-- `reproduce.py`, `tests/`, `expected/`: offline recomputation and frozen expectations.
-- `materials/`: upstream URLs/commits and compact frozen before/after source snapshots for the six agent-control items.
-- `licenses/`: upstream license notices.
-- `DATA_DICTIONARY.md`: population definitions and joins.
-- `MANIFEST.json`, `verify.py`: release-file integrity and anonymity checks.
+## Review conditions
 
-Example prompt rendering (no API call): `python render_prompt.py D2-a bare`.
+The data uses four condition keys:
 
-The package contains the analysis populations and final research materials, not a dump of the collection workspace. Earlier/superseded runs, chat/curation notes, budgets, temporary outputs, debugging scripts, Git history and environment folders are excluded. The paper is submitted separately and is not duplicated here. Verbatim main review text and issue-label values are unchanged.
+- `bare` — PR title and diff.
+- `generic` — architecture context and the standard reviewer persona.
+- `design` — architecture context and a design-review persona.
+- `linter` — architecture context and detector/mutation evidence.
 
-## Source reconstruction
+Render a prompt for a benchmark item:
 
-`materials/upstream_sources.json` pins the three upstream base commits. Historical human PRs also carry their own parent/head provenance in the item records. `materials/clean_source_snapshots.zip` contains fixed before/after input states, without Git metadata or local environments. Extract these only when inspecting source-level evidence; the default offline statistics do not require extraction.
+```sh
+python render_prompt.py D2-a bare
+python render_prompt.py D2-a design
+```
 
-Prompt rendering displays the archived template definitions; it is not represented as a wire capture for every historical request. Historical validation descriptions remain in item metadata. This package reproduces the archived evaluation rather than starting a new model collection.
+Architecture statements and system-prompt templates are stored in [`prompts/`](prompts/).
 
-## Review use
+## Repository layout
 
-Provided for anonymous peer review. Included upstream code/excerpts retain the notices in `licenses/`. No additional public redistribution license is asserted for the original research materials.
+```text
+data/                 Benchmark items, model responses, annotations, and pilot data
+prompts/              Architecture context and reviewer prompt templates
+materials/            Frozen upstream commits and source snapshots
+expected/             Reference results used by the verification checks
+outputs/              Recomputed summaries and verification reports
+tests/                Data, metric, and prompt-rendering tests
+licenses/             Upstream source license notices
+reproduce.py          Recompute and check experiment statistics
+render_prompt.py      Render the prompt for an item and condition
+verify.py             Check repository files, hashes, and data hygiene
+```
+
+## Working with the data
+
+Main review records are in [`data/reviews.jsonl`](data/reviews.jsonl). Join their `release_id` to [`data/annotations.jsonl`](data/annotations.jsonl) to inspect the corresponding judgments and checking evidence. Full code-change diffs are in [`data/items.jsonl`](data/items.jsonl).
+
+The pilot has separate item, response, and annotation files. Pilot annotations join to responses through `review_id`.
+
+[`materials/upstream_sources.json`](materials/upstream_sources.json) records upstream URLs and frozen commits. [`materials/clean_source_snapshots.zip`](materials/clean_source_snapshots.zip) provides before/after source states for the six agent-control items.
+
+## Integrity and source licenses
+
+`MANIFEST.json` records SHA-256 hashes for the repository materials. After an intentional file update, regenerate and check the manifest:
+
+```sh
+python verify.py --build-manifest
+python verify.py
+```
+
+Upstream source code and excerpts retain the license notices in [`licenses/`](licenses/).

@@ -1,4 +1,4 @@
-"""Verify the anonymous release inventory, hashes and text hygiene."""
+"""Verify Plumbline repository files, hashes, and data hygiene."""
 import argparse,hashlib,json,re,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
@@ -9,13 +9,13 @@ def main():
     a=argparse.ArgumentParser();a.add_argument('--build-manifest',action='store_true');args=a.parse_args();errors=[];files=release_files();inventory={}
     secret=re.compile(r'\b(?:sk-[A-Za-z0-9_-]{24,}|ghp_[A-Za-z0-9]{24,}|github_pat_[A-Za-z0-9_]{24,})')
     local=re.compile(r'[A-Za-z]:[\\/](?:Users[\\/]|my[\\/]ICPC)',re.I)
-    forbidden={'study_s1','provenance','private_archive','paper','node_modules','.venv'}
+    forbidden={'node_modules','.venv','__pycache__'}
     def inspect(text,name):
         if secret.search(text):errors.append('Credential-like token: '+name)
         if local.search(text.replace('\\\\','\\')):errors.append('Local-machine path: '+name)
     for p in files:
         rel=p.relative_to(ROOT).as_posix()
-        if p.relative_to(ROOT).parts[0] in forbidden or p.name in ['.env','annotation_author_confirmation.json'] or p.suffix in ['.pdf','.tex','.key','.pem','.log']:errors.append('Unexpected submission material: '+rel)
+        if p.relative_to(ROOT).parts[0] in forbidden or p.name=='.env' or p.suffix in ['.key','.pem']:errors.append('Unexpected runtime/credential file: '+rel)
         if p.suffix in ['.json','.jsonl','.md','.py','.txt']:inspect(p.read_text(encoding='utf-8'),rel)
         if p.suffix=='.zip':
             with zipfile.ZipFile(p) as z:
@@ -27,12 +27,12 @@ def main():
         if rel not in SKIP:inventory[rel]={'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
     manifest=ROOT/'MANIFEST.json'
     if args.build_manifest:
-        manifest.write_text(json.dumps({'purpose':'anonymous peer review','hash':'sha256','excluded_generated_directory':'outputs/','files':inventory},indent=2)+'\n',encoding='utf-8')
+        manifest.write_text(json.dumps({'project':'Plumbline','purpose':'public research repository','hash':'sha256','excluded_generated_directory':'outputs/','files':inventory},indent=2)+'\n',encoding='utf-8',newline='\n')
     else:
         expected=json.loads(manifest.read_text(encoding='utf-8'))['files']
         for name in sorted(set(expected)|set(inventory)):
             if expected.get(name)!=inventory.get(name):errors.append('Inventory/hash mismatch: '+name)
     if errors:
         print('\n'.join(errors));raise SystemExit(1)
-    print(f'PASS: {len(inventory)} release files; hashes, source snapshot archive and anonymous text hygiene checked.')
+    print(f'PASS: {len(inventory)} release files; hashes, source snapshot archive and data hygiene checked.')
 if __name__=='__main__':main()

@@ -1,4 +1,4 @@
-"""Display prompt templates for a released item; does not call model APIs."""
+"""Render a Plumbline benchmark prompt from the stored templates."""
 import argparse,json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
@@ -46,5 +46,5 @@ def main():
     rows=[json.loads(l) for l in (ROOT/'data/items.jsonl').read_text(encoding='utf-8').splitlines() if l.strip()];it=next(r for r in rows if r['id']==a.item)
     use_repo_builder=(it['campaign']=='core_grid' and it['id'].startswith(('K4','D1'))) or (it['campaign']=='expansion' and it.get('repo_key','rentomatic')!='rentomatic')
     msg=review_prompt_with_repo_context(it,a.mode) if use_repo_builder else review_prompt(it,a.mode)
-    print(json.dumps({'item':a.item,'mode':a.mode,'system_prompt_template':MODE_PROMPTS[a.mode],'user_messages':msg,'record_type':'template rendering, not a captured wire request'},ensure_ascii=False,indent=2))
+    print(json.dumps({'item':a.item,'mode':a.mode,'system_prompt_template':MODE_PROMPTS[a.mode],'user_messages':msg,'record_type':'rendered_prompt_template'},ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

@@ -1,28 +1,63 @@
 # Data dictionary
 
-## Files and joins
+## Main dataset
 
-- `items.jsonl`: 66 main item records with `id`, `campaign`, `cat`, title, complete diff and supplied validation/provenance metadata.
-- `reviews.jsonl`: 836 main records. `release_id` is unique. `campaign` distinguishes `core`, `gpt_replication`, and `expansion`; `item`, `model`, `mode`, `rep` identify the response. `text` is the verbatim archived output and `verdict` is the parsed blocking decision.
-- `annotations.jsonl`: 686 final issue-coded review records, joined to reviews by `release_id`. Original blinded `review_id` values and issue checking evidence are retained. `track` is a historical analysis field; `campaign` is the release-level population field.
-- `pilot_items.jsonl`, `pilot_reviews.jsonl`, `pilot_annotations.jsonl`: the separate 18-item/72-response paired pilot. Pilot attribution labels join directly to pilot responses by original `review_id`; the annotation `case_id` matches the response `item`. Original case/item IDs and model aliases are retained.
-- `item_status.json`: adjudicated non-violations, the pilot X family, out-of-view expansion items, validated bugs and title-congruent changes.
+### Items — `data/items.jsonl`
 
-Curation-only source filenames, local source-line references, chunk names and packaging/author-confirmation metadata are omitted from the review release. Review text, scientific item metadata, checking evidence and label values are preserved.
+Contains 66 benchmark items. Each record includes an `id`, `campaign`, `cat`, title, full code-change diff, and available validation/provenance metadata. Item status and analysis groups are defined in `data/item_status.json`.
+
+### Reviews — `data/reviews.jsonl`
+
+Contains 836 model responses. `release_id` uniquely identifies each response. The fields `campaign`, `item`, `model`, `mode`, and `rep` identify its experimental setting. `text` contains the model response; `verdict` contains the parsed approve/reject decision.
+
+Campaigns are `core`, `gpt_replication`, and `expansion`. Model identifiers use the strings recorded during collection, including `deepseek-chat`.
+
+### Annotations — `data/annotations.jsonl`
+
+Contains 686 final issue-coded review records. Join to reviews through `release_id`. Records preserve the blinded `review_id`, issue labels, and checking evidence. `track` is the original-grid analysis field; `campaign` identifies the population across the full dataset.
+
+Human coders independently assessed metadata-blinded review packets, followed by adjudication, as described in the paper. Analysis metadata is included with the released records to support reproduction.
+
+## Paired-burial pilot
+
+The pilot comprises 18 items and 72 responses:
+
+- `data/pilot_items.jsonl` — the minimal, buried, and carrier-only item variants.
+- `data/pilot_reviews.jsonl` — model responses and their item/model identifiers.
+- `data/pilot_annotations.jsonl` — supplied attribution judgments.
+
+Join pilot responses and annotations through `review_id`. The annotation `case_id` corresponds to the response `item`.
 
 ## Conditions
 
-- `bare`: diff, without the architecture statement.
-- `generic`: architecture statement with the standard reviewer persona.
-- `design`: architecture statement with a design-review persona.
-- `linter`: architecture statement with detector/mutation evidence.
+- `bare`: PR title and diff.
+- `generic`: architecture context with the standard reviewer persona.
+- `design`: architecture context with a design-review persona.
+- `linter`: architecture context with detector/mutation evidence.
 
-The raw key `generic` names the architecture condition. Model aliases are retained as recorded, including `deepseek-chat`; aliases are not silently converted into backend/version claims.
+The stored key `generic` denotes the architecture condition. Prompt templates and architecture statements are in `prompts/`.
 
-## Labels and denominators
+## Labels
 
-`T` denotes a verified substantive issue, `P` a verified minor/conditional issue, `I` a refuted premise and `U` an undetermined issue. At review level, `tpi=T` means at least one verified substantive issue. Review-level yields and issue-level precision use different denominators.
+Issue-level labels are:
 
-The main 836 responses include one invalid verdict. Approval fractions exclude invalid verdicts, so agent-control approvals can use 71 as the denominator. Sampling stability uses 88 leak cells with three repetitions each. The 72 pilot responses are not part of 836. The pilot X family is an adjudicated non-violation and is kept separate from R/C violation attribution.
+- `T`: verified substantive issue.
+- `P`: verified minor or conditional issue.
+- `I`: refuted premise.
+- `U`: undetermined issue.
 
-A `clean` category is a control provenance label, not a guarantee that every issue in that code is absent. Historical human PR source provenance refers to upstream project authors, not submission authors.
+At review level, `tpi=T` means that the review contains at least one verified substantive issue. Construct-level `Y`/`N` labels describe whether the reviewer names the target construct or rule. `item_status.json` supplies the corresponding item classifications, including adjudicated non-violations and out-of-view items.
+
+The `clean` category identifies a control population. Findings on control items retain their source-checked labels.
+
+## Analysis units
+
+The main dataset has 836 responses across 660 distinct `(campaign, item, model, mode)` cells. Expansion leak cells contain three repetitions each. The 88 repeated leak cells are the sampling-stability population.
+
+Approval rates use valid verdicts. The dataset retains one invalid verdict, which gives 71 valid verdicts in the relevant agent-control denominator. Review-level yields and issue-level precision use their respective review and issue counts.
+
+The 72 pilot responses form a separate population. Pilot family X is an adjudicated non-violation; the R/C families are used for violation-attribution comparisons.
+
+## Source materials
+
+`materials/upstream_sources.json` records frozen upstream commits. Historical human PR items also include their own upstream source provenance. `materials/clean_source_snapshots.zip` contains fixed before/after states for the six agent-control items. Project authors named in upstream PR metadata are the authors of those source changes.
