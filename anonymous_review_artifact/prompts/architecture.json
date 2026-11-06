@@ -1,0 +1,5 @@
+{
+  "rentomatic": "Project context: a Python/Flask storage-room rental service following a layered architecture. Dependency direction: REST layer -> use cases -> domain; the repository implements domain interfaces. The domain and use case layers must not depend on the REST/Flask layer.",
+  "fastapi_template": "Project context: the backend of a Python/FastAPI full-stack template following a layered architecture. Dependency direction: API routers -> CRUD utilities -> database/SQLAlchemy models; the database model layer must not depend on the API layer, and the CRUD/service layer must not depend on web-layer objects (Request, routers).",
+  "saleor": "Project context: a Python/Django e-commerce platform with a GraphQL API. Dependency direction: GraphQL resolvers / API layer -> per-application domain models; domain models must not depend on the GraphQL/API layer."
+}
